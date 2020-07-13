@@ -62,6 +62,7 @@
             this.Status = new System.Windows.Forms.DataGridViewImageColumn();
             this.DataValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Description = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.UpdateDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gvList)).BeginInit();
             this.menuStrip1.SuspendLayout();
@@ -77,16 +78,16 @@
             this.panel1.Controls.Add(this.chboxInterval);
             this.panel1.Controls.Add(this.btnRead);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel1.Location = new System.Drawing.Point(0, 333);
+            this.panel1.Location = new System.Drawing.Point(0, 376);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(927, 48);
+            this.panel1.Size = new System.Drawing.Size(984, 48);
             this.panel1.TabIndex = 2;
             // 
             // btnWrite
             // 
             this.btnWrite.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnWrite.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnWrite.Location = new System.Drawing.Point(655, 3);
+            this.btnWrite.Location = new System.Drawing.Point(712, 2);
             this.btnWrite.Name = "btnWrite";
             this.btnWrite.Size = new System.Drawing.Size(79, 42);
             this.btnWrite.TabIndex = 5;
@@ -96,13 +97,12 @@
             // 
             // lblResult
             // 
-            this.lblResult.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.lblResult.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lblResult.ForeColor = System.Drawing.Color.Red;
             this.lblResult.Location = new System.Drawing.Point(3, 4);
             this.lblResult.Name = "lblResult";
-            this.lblResult.Size = new System.Drawing.Size(571, 41);
+            this.lblResult.Size = new System.Drawing.Size(616, 41);
             this.lblResult.TabIndex = 4;
             this.lblResult.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -110,26 +110,26 @@
             // 
             this.lblIntervalUnit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.lblIntervalUnit.AutoSize = true;
-            this.lblIntervalUnit.Location = new System.Drawing.Point(817, 29);
+            this.lblIntervalUnit.Location = new System.Drawing.Point(874, 28);
             this.lblIntervalUnit.Name = "lblIntervalUnit";
-            this.lblIntervalUnit.Size = new System.Drawing.Size(24, 13);
+            this.lblIntervalUnit.Size = new System.Drawing.Size(26, 13);
             this.lblIntervalUnit.TabIndex = 3;
-            this.lblIntervalUnit.Text = "(sn)";
+            this.lblIntervalUnit.Text = "(ms)";
             // 
             // txtInterval
             // 
             this.txtInterval.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtInterval.Location = new System.Drawing.Point(784, 25);
+            this.txtInterval.Location = new System.Drawing.Point(841, 24);
             this.txtInterval.Name = "txtInterval";
             this.txtInterval.Size = new System.Drawing.Size(31, 20);
             this.txtInterval.TabIndex = 2;
-            this.txtInterval.Text = "10";
+            this.txtInterval.Text = "300";
             // 
             // chboxInterval
             // 
             this.chboxInterval.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.chboxInterval.AutoSize = true;
-            this.chboxInterval.Location = new System.Drawing.Point(784, 3);
+            this.chboxInterval.Location = new System.Drawing.Point(841, 2);
             this.chboxInterval.Name = "chboxInterval";
             this.chboxInterval.Size = new System.Drawing.Size(68, 17);
             this.chboxInterval.TabIndex = 1;
@@ -141,7 +141,7 @@
             // 
             this.btnRead.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnRead.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnRead.Location = new System.Drawing.Point(854, 3);
+            this.btnRead.Location = new System.Drawing.Point(911, 2);
             this.btnRead.Name = "btnRead";
             this.btnRead.Size = new System.Drawing.Size(70, 42);
             this.btnRead.TabIndex = 0;
@@ -164,11 +164,12 @@
             this.IsWritable,
             this.Status,
             this.DataValue,
-            this.Description});
+            this.Description,
+            this.UpdateDate});
             this.gvList.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gvList.Location = new System.Drawing.Point(0, 24);
             this.gvList.Name = "gvList";
-            this.gvList.Size = new System.Drawing.Size(927, 309);
+            this.gvList.Size = new System.Drawing.Size(984, 352);
             this.gvList.TabIndex = 3;
             this.gvList.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gvList_CellContentDoubleClick);
             this.gvList.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.gvList_DataError);
@@ -185,7 +186,7 @@
             this.fileToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(927, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(984, 24);
             this.menuStrip1.TabIndex = 4;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -203,26 +204,26 @@
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(100, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
             // 
             // closeToolStripMenuItem
             // 
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
+            this.closeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.closeToolStripMenuItem.Text = "Close";
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
             // 
@@ -265,7 +266,7 @@
             // 
             this.SlaveId.HeaderText = "SlaveId";
             this.SlaveId.Name = "SlaveId";
-            this.SlaveId.Width = 50;
+            this.SlaveId.Width = 45;
             // 
             // Address
             // 
@@ -283,13 +284,13 @@
             // 
             this.DataType.HeaderText = "DataType";
             this.DataType.Name = "DataType";
-            this.DataType.Width = 80;
+            this.DataType.Width = 70;
             // 
             // ByteOrder
             // 
             this.ByteOrder.HeaderText = "ByteOrder";
             this.ByteOrder.Name = "ByteOrder";
-            this.ByteOrder.Width = 80;
+            this.ByteOrder.Width = 70;
             // 
             // RegisterLength
             // 
@@ -298,15 +299,15 @@
             this.RegisterLength.HeaderText = "Length";
             this.RegisterLength.Name = "RegisterLength";
             this.RegisterLength.ReadOnly = true;
-            this.RegisterLength.Width = 45;
+            this.RegisterLength.Width = 42;
             // 
             // IsWritable
             // 
-            this.IsWritable.HeaderText = "IsWritable";
+            this.IsWritable.HeaderText = "Writable";
             this.IsWritable.Name = "IsWritable";
             this.IsWritable.ReadOnly = true;
             this.IsWritable.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.IsWritable.Width = 65;
+            this.IsWritable.Width = 50;
             // 
             // Status
             // 
@@ -329,13 +330,20 @@
             this.Description.HeaderText = "Description";
             this.Description.Name = "Description";
             this.Description.ReadOnly = true;
-            this.Description.Width = 175;
+            this.Description.Width = 150;
+            // 
+            // UpdateDate
+            // 
+            this.UpdateDate.HeaderText = "Date";
+            this.UpdateDate.Name = "UpdateDate";
+            this.UpdateDate.ReadOnly = true;
+            this.UpdateDate.Width = 125;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(927, 381);
+            this.ClientSize = new System.Drawing.Size(984, 424);
             this.Controls.Add(this.pboxLoading);
             this.Controls.Add(this.gvList);
             this.Controls.Add(this.panel1);
@@ -389,6 +397,7 @@
         private System.Windows.Forms.DataGridViewImageColumn Status;
         private System.Windows.Forms.DataGridViewTextBoxColumn DataValue;
         private System.Windows.Forms.DataGridViewTextBoxColumn Description;
+        private System.Windows.Forms.DataGridViewTextBoxColumn UpdateDate;
     }
 }
 

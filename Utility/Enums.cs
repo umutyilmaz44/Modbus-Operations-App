@@ -11,7 +11,9 @@ namespace ModbusOperationsApp.Utility
         ABCD=1,
         CDAB,
         BADC,
-        DCBA
+        DCBA,
+        AB,
+        BA
     }
 
     public enum DataType

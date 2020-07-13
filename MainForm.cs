@@ -43,7 +43,9 @@ namespace ModbusOperationsApp
                 this.DataType.Items.Add(dataType);
             }
 
-            foreach (string byteOrder in Enum.GetNames(typeof(ByteOrder)))
+            List<string> byteOrders = Enum.GetNames(typeof(Utility.ByteOrder)).ToList();
+            byteOrders = byteOrders.Where(x => x != "AB" && x != "BA").ToList();
+            foreach (string byteOrder in byteOrders)
             {
                 this.ByteOrder.Items.Add(byteOrder);
             }
@@ -95,16 +97,20 @@ namespace ModbusOperationsApp
 
         private void DataType_OnChange(object sender, EventArgs e)
         {
-            DataType dataType;
-            var currentcell = gvList.CurrentCellAddress;
-            var cmbDataTypeControl = sender as DataGridViewComboBoxEditingControl;
-            System.Enum.TryParse<DataType>(cmbDataTypeControl.EditingControlFormattedValue.ToString(), out dataType);
+            if (gvList.CurrentCellAddress.X == gvList.Columns["DataType"].Index)
+            {
+                DataType dataType;
+                var currentcell = gvList.CurrentCellAddress;
+                var cmbDataTypeControl = sender as DataGridViewComboBoxEditingControl;
+                System.Enum.TryParse<DataType>(cmbDataTypeControl.EditingControlFormattedValue.ToString(), out dataType);
 
-            CheckControl_OnChangeDataType(currentcell.Y, dataType);
+                CheckControl_OnChangeDataType(currentcell.Y, dataType);
+            }
         }
         private void CheckControl_OnChangeDataType(int rowIndex, DataType dataType)
         {
             DataGridViewTextBoxCell lengthCell = (DataGridViewTextBoxCell)gvList.Rows[rowIndex].Cells["RegisterLength"];
+            DataGridViewComboBoxCell byteOrderCell = (DataGridViewComboBoxCell)(gvList.Rows[rowIndex].Cells["ByteOrder"]);
 
             switch (dataType)
             {
@@ -130,16 +136,44 @@ namespace ModbusOperationsApp
                     lengthCell.ReadOnly = false;
                     break;
             }
+
+            byteOrderCell.Items.Clear();
+            switch (dataType)
+            {
+                case Utility.DataType.Int16:
+                case Utility.DataType.UInt16:
+                    {                        
+                        Utility.ByteOrder[] byteOrders = new ByteOrder[] { Utility.ByteOrder.AB, Utility.ByteOrder.BA };
+                        for (int i = 0; i < byteOrders.Length; i++)
+                        {
+                            byteOrderCell.Items.Add(Enum.GetName(typeof(ByteOrder), byteOrders[i]));
+                        }
+                    }
+                    break;
+                default:
+                    {
+                        List<string> byteOrders = Enum.GetNames(typeof(Utility.ByteOrder)).ToList();
+                        byteOrders = byteOrders.Where(x => x != "AB" && x != "BA").ToList();
+                        foreach (string byteOrder in byteOrders)
+                        {
+                            byteOrderCell.Items.Add(byteOrder);
+                        }
+                    }
+                    break;
+            }
         }
         
         private void RegisterType_OnChange(object sender, EventArgs e)
         {
-            var currentcell = gvList.CurrentCellAddress;
-            RegisterType registerType;
-            var cmbDataTypeControl = sender as DataGridViewComboBoxEditingControl;
-            System.Enum.TryParse<RegisterType>(cmbDataTypeControl.EditingControlFormattedValue.ToString(), out registerType);
+            if (gvList.CurrentCellAddress.X == gvList.Columns["RegisterType"].Index)
+            {
+                var currentcell = gvList.CurrentCellAddress;
+                RegisterType registerType;
+                var cmbDataTypeControl = sender as DataGridViewComboBoxEditingControl;
+                System.Enum.TryParse<RegisterType>(cmbDataTypeControl.EditingControlFormattedValue.ToString(), out registerType);
 
-            CheckControl_OnChangeRegisterType(currentcell.Y, registerType);
+                CheckControl_OnChangeRegisterType(currentcell.Y, registerType);
+            }
         }
         private void CheckControl_OnChangeRegisterType(int rowIndex, RegisterType registerType)
         {
@@ -365,7 +399,12 @@ namespace ModbusOperationsApp
         {
             int intervals = 1;
             Int32.TryParse(txtInterval.Text, out intervals);
-            tmrIntervalControl.Interval = 1000 * intervals;
+            if (intervals < 100)
+            {
+                intervals = 100;
+                txtInterval.Text = "100";
+            }
+            tmrIntervalControl.Interval = intervals;
 
             tmrIntervalControl.Enabled = chboxInterval.Checked;
         }
@@ -625,7 +664,10 @@ namespace ModbusOperationsApp
         private void ReadModbus(ModbusInfo modbusInfo)
         {
             string result = "";
-            string resultValue = "";
+            object resultValue = "";
+            byte[] byteDataArray;
+            byte[] orderedByteData;
+
             Bitmap resultImage = null;
             ModbusIpMaster modbusIpMaster;
             UtilityFunctions utilityFunctions = new UtilityFunctions();
@@ -635,7 +677,6 @@ namespace ModbusOperationsApp
                 result = "";
                 resultValue = "";
                 resultImage = null;
-                byte[] byteDataArray;
 
                 try
                 {
@@ -657,40 +698,42 @@ namespace ModbusOperationsApp
                             
                             byteDataArray = utilityFunctions.GetRegisterBytes(inputRegsters);
 
-                            result = utilityFunctions.ByteArrayToString(byteDataArray.ToArray());
-
                             switch (dataMapInfo.DataType)
                             {
                                 case Utility.DataType.Int16:
-                                    resultValue = utilityFunctions.GetValue<Int16>(byteDataArray, dataMapInfo.ByteOrder).ToString();
+                                    resultValue = utilityFunctions.GetValue<Int16>(byteDataArray, dataMapInfo.ByteOrder, out orderedByteData);
                                     break;
                                 case Utility.DataType.UInt16:
-                                    resultValue = utilityFunctions.GetValue<UInt16>(byteDataArray, dataMapInfo.ByteOrder).ToString();
+                                    resultValue = utilityFunctions.GetValue<UInt16>(byteDataArray, dataMapInfo.ByteOrder, out orderedByteData);
                                     break;
                                 case Utility.DataType.Int32:
-                                    resultValue = utilityFunctions.GetValue<Int32>(byteDataArray, dataMapInfo.ByteOrder).ToString();
+                                    resultValue = utilityFunctions.GetValue<Int32>(byteDataArray, dataMapInfo.ByteOrder, out orderedByteData);
                                     break;
                                 case Utility.DataType.UInt32:
-                                    resultValue = utilityFunctions.GetValue<UInt32>(byteDataArray, dataMapInfo.ByteOrder).ToString();
+                                    resultValue = utilityFunctions.GetValue<UInt32>(byteDataArray, dataMapInfo.ByteOrder, out orderedByteData);
                                     break;
                                 case Utility.DataType.Int64:
-                                    resultValue = utilityFunctions.GetValue<Int64>(byteDataArray, dataMapInfo.ByteOrder).ToString();
+                                    resultValue = utilityFunctions.GetValue<Int64>(byteDataArray, dataMapInfo.ByteOrder, out orderedByteData);
                                     break;
                                 case Utility.DataType.UInt64:
-                                    resultValue = utilityFunctions.GetValue<UInt64>(byteDataArray, dataMapInfo.ByteOrder).ToString();
+                                    resultValue = utilityFunctions.GetValue<UInt64>(byteDataArray, dataMapInfo.ByteOrder, out orderedByteData);
                                     break;
                                 case Utility.DataType.Double:
-                                    resultValue = utilityFunctions.GetValue<Double>(byteDataArray, dataMapInfo.ByteOrder).ToString();
+                                    resultValue = utilityFunctions.GetValue<Double>(byteDataArray, dataMapInfo.ByteOrder, out orderedByteData);
                                     break;
                                 case Utility.DataType.Float:
-                                    resultValue = utilityFunctions.GetValue<float>(byteDataArray, dataMapInfo.ByteOrder).ToString();
+                                    resultValue = utilityFunctions.GetValue<float>(byteDataArray, dataMapInfo.ByteOrder, out orderedByteData);
                                     break;
                                 case Utility.DataType.String:
-                                    resultValue = utilityFunctions.GetValue<String>(byteDataArray, dataMapInfo.ByteOrder).ToString();
+                                    resultValue = utilityFunctions.GetValue<String>(byteDataArray, dataMapInfo.ByteOrder, out orderedByteData);
                                     break;
                                 default:
+                                    orderedByteData = new byte[byteDataArray.Length];
+                                    Array.Copy(byteDataArray, 0, orderedByteData, 0, byteDataArray.Length);
                                     break;
                             }
+
+                            result = utilityFunctions.ByteArrayToString(byteDataArray.ToArray());
                             #endregion
                             break;
                         case Utility.RegisterType.Holding_Register:
@@ -699,40 +742,42 @@ namespace ModbusOperationsApp
 
                             byteDataArray = utilityFunctions.GetRegisterBytes(holdingRegisters);
 
-                            result = utilityFunctions.ByteArrayToString(byteDataArray.ToArray());
-
                             switch (dataMapInfo.DataType)
                             {
                                 case Utility.DataType.Int16:
-                                    resultValue = utilityFunctions.GetValue<Int16>(byteDataArray, dataMapInfo.ByteOrder).ToString();
+                                    resultValue = utilityFunctions.GetValue<Int16>(byteDataArray, dataMapInfo.ByteOrder, out orderedByteData);
                                     break;
                                 case Utility.DataType.UInt16:
-                                    resultValue = utilityFunctions.GetValue<UInt16>(byteDataArray, dataMapInfo.ByteOrder).ToString();
+                                    resultValue = utilityFunctions.GetValue<UInt16>(byteDataArray, dataMapInfo.ByteOrder, out orderedByteData);
                                     break;
                                 case Utility.DataType.Int32:
-                                    resultValue = utilityFunctions.GetValue<Int32>(byteDataArray, dataMapInfo.ByteOrder).ToString();
+                                    resultValue = utilityFunctions.GetValue<Int32>(byteDataArray, dataMapInfo.ByteOrder, out orderedByteData);
                                     break;
                                 case Utility.DataType.UInt32:
-                                    resultValue = utilityFunctions.GetValue<UInt32>(byteDataArray, dataMapInfo.ByteOrder).ToString();
+                                    resultValue = utilityFunctions.GetValue<UInt32>(byteDataArray, dataMapInfo.ByteOrder, out orderedByteData);
                                     break;
                                 case Utility.DataType.Int64:
-                                    resultValue = utilityFunctions.GetValue<Int64>(byteDataArray, dataMapInfo.ByteOrder).ToString();
+                                    resultValue = utilityFunctions.GetValue<Int64>(byteDataArray, dataMapInfo.ByteOrder, out orderedByteData);
                                     break;
                                 case Utility.DataType.UInt64:
-                                    resultValue = utilityFunctions.GetValue<UInt64>(byteDataArray, dataMapInfo.ByteOrder).ToString();
+                                    resultValue = utilityFunctions.GetValue<UInt64>(byteDataArray, dataMapInfo.ByteOrder, out orderedByteData);
                                     break;
                                 case Utility.DataType.Double:
-                                    resultValue = utilityFunctions.GetValue<Double>(byteDataArray, dataMapInfo.ByteOrder).ToString("0.0000000000").TrimEnd('0');
+                                    resultValue = utilityFunctions.GetValue<Double>(byteDataArray, dataMapInfo.ByteOrder, out orderedByteData);
                                     break;
                                 case Utility.DataType.Float:
-                                    resultValue = utilityFunctions.GetValue<float>(byteDataArray, dataMapInfo.ByteOrder).ToString("0.0000000000").TrimEnd('0');
+                                    resultValue = utilityFunctions.GetValue<float>(byteDataArray, dataMapInfo.ByteOrder, out orderedByteData);
                                     break;
                                 case Utility.DataType.String:
-                                    resultValue = utilityFunctions.GetValue<String>(byteDataArray, dataMapInfo.ByteOrder).ToString();
+                                    resultValue = utilityFunctions.GetValue<String>(byteDataArray, dataMapInfo.ByteOrder, out orderedByteData);
                                     break;
-                                default:                                    
+                                default:
+                                    orderedByteData = new byte[byteDataArray.Length];
+                                    Array.Copy(byteDataArray, 0, orderedByteData, 0, byteDataArray.Length);
                                     break;
                             }
+
+                            result = utilityFunctions.ByteArrayToString(byteDataArray.ToArray());
                             #endregion
                             break;
                     }
@@ -751,6 +796,7 @@ namespace ModbusOperationsApp
                         gvList.Rows[dataMapInfo.rowIndex].Cells["DataValue"].Value = resultValue;
                         gvList.Rows[dataMapInfo.rowIndex].Cells["Status"].Value = resultImage;
                         gvList.Rows[dataMapInfo.rowIndex].Cells["Description"].Value = result;
+                        gvList.Rows[dataMapInfo.rowIndex].Cells["UpdateDate"].Value = DateTime.Now.ToString("HH:mm:ss.fff yyyy.MM.dd");
                     }));
                 }
             }
@@ -825,9 +871,9 @@ namespace ModbusOperationsApp
 
                                 modbusIpMaster = ModbusIpMaster.CreateIp(new TcpClient(modbusInfo.ip, modbusInfo.port));
 
-                                ushort[] registers = utilityFunctions.GetRegisterValues(dataList, dataMapInfo.ByteOrder);
+                                ushort[] registers = utilityFunctions.GetRegisterValues(dataList);
                                 modbusIpMaster.WriteMultipleRegisters(dataMapInfo.SlaveId, dataMapInfo.Address, registers);
-
+                                
                                 result = utilityFunctions.RegisterArrayToString(registers);
                                 resultImage = ModbusOperationsApp.Properties.Resources.ok;
                             }
@@ -852,6 +898,6 @@ namespace ModbusOperationsApp
                     }
                 }
             }
-        }        
+        }
     }
 }
