@@ -26,7 +26,7 @@ namespace ModbusOperationsApp.Utility
     public class DataMapInfo
     {
         public int rowIndex;
-
+        public string TagName { get; set; }
         public byte SlaveId { get; set; }
         public ushort Address { get; set; }
         public ushort Length { get; set; }
@@ -35,9 +35,10 @@ namespace ModbusOperationsApp.Utility
         public RegisterType RegisterType { get; set; }
         public bool IsWritable { get; set; }
 
-        public DataMapInfo(int rowIndex, byte slaveId, ushort address, ushort length, DataType dataType, ByteOrder byteOrder, RegisterType registerType, bool isWritable)
+        public DataMapInfo(int rowIndex, string tagName, byte slaveId, ushort address, ushort length, DataType dataType, ByteOrder byteOrder, RegisterType registerType, bool isWritable)
         {
             this.rowIndex = rowIndex;
+            this.TagName = tagName;
             this.SlaveId = slaveId;
             this.Address = address;
             this.Length = length;

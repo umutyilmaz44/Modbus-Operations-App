@@ -19,6 +19,9 @@ namespace ModbusOperationsApp
 {
     public partial class MainForm : Form
     {
+        TagForm tagForm;
+        List<ModbusInfo> modbusInfoList = new List<ModbusInfo>();
+
         public MainForm()
         {
             InitializeComponent();
@@ -31,12 +34,12 @@ namespace ModbusOperationsApp
 
         private void MainForm_ResizeEnd(object sender, EventArgs e)
         {
-            SetLoadingPictureLocation();
         }
 
         private void InitForm()
         {
-            pboxLoading.Visible = false;
+            tagForm = null;
+            btnSelectGridView_Click(null, null);
 
             foreach (string dataType in Enum.GetNames(typeof(DataType)))
             {
@@ -54,14 +57,57 @@ namespace ModbusOperationsApp
             {
                 this.RegisterType.Items.Add(registerType);
             }
-
-            SetLoadingPictureLocation();
         }
 
-        private void SetLoadingPictureLocation()
+
+        public void AddModbusInfo(ModbusInfo modbusInfo, DataMapInfo dataMapInfo)
         {
-            pboxLoading.Location = new Point(((this.Width - pboxLoading.Width) / 2), ((this.Height - pboxLoading.Height) / 2));
+            modbusInfo.DataMapInfoList.Add(dataMapInfo);                
+            modbusInfoList.Add(modbusInfo);
+
+            int rowId;
+            CheckModbusInfoOnGridView(modbusInfo, dataMapInfo, out rowId);
+            CheckModbusInfoOnCardView(modbusInfo, dataMapInfo);
+
+            dataMapInfo.rowIndex = rowId;
         }
+
+        public void UpdateModbusInfo(ModbusInfo modbusInfo, DataMapInfo dataMapInfo)
+        {
+            int rowId;
+            CheckModbusInfoOnGridView(modbusInfo, dataMapInfo, out rowId);
+            CheckModbusInfoOnCardView(modbusInfo, dataMapInfo);
+            dataMapInfo.rowIndex = rowId;
+        }
+        public void RemoveModbusInfo(ModbusInfo modbusInfo, DataMapInfo dataMapInfo)
+        {
+            ModbusInfo existModbusInfo = modbusInfoList.FirstOrDefault(x => x.ip == modbusInfo.ip && x.port == modbusInfo.port);
+            if (existModbusInfo != null)
+            {
+                modbusInfoList.Remove(modbusInfo);
+                DataMapInfo existedDataMapInfo = existModbusInfo.DataMapInfoList.FirstOrDefault(x => x.SlaveId == dataMapInfo.SlaveId && x.Address == dataMapInfo.Address);
+                if (existedDataMapInfo != null)
+                {
+                    existModbusInfo.DataMapInfoList.Remove(existedDataMapInfo);
+                }
+
+                RemoveModbusInfoOnGridView(modbusInfo, dataMapInfo);
+            }
+        }
+
+        public bool CheckExistModbusInfo(ModbusInfo modbusInfo, DataMapInfo dataMapInfo)
+        {
+            ModbusInfo existModbusInfo = modbusInfoList.FirstOrDefault(x => x.ip == modbusInfo.ip && x.port == modbusInfo.port);
+            if (existModbusInfo == null)
+            {
+                return false;
+            }
+            else 
+            {
+                return existModbusInfo.DataMapInfoList.Any(x => x.SlaveId == dataMapInfo.SlaveId && x.Address == dataMapInfo.Address);
+            }
+        }
+
         private async void tmrIntervalControl_Tick(object sender, EventArgs e)
         {
             await ReadModbusList();
@@ -73,10 +119,79 @@ namespace ModbusOperationsApp
             {
                 MessageBox.Show(gvList.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString().Trim(), "Description Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
+            else
+            {
+                string ip = gvList.Rows[e.RowIndex].Cells["Ip"].Value?.ToString().Trim();
+                string portText = gvList.Rows[e.RowIndex].Cells["Port"].Value?.ToString().Trim();
+                string slaveIdText = gvList.Rows[e.RowIndex].Cells["SlaveId"].Value?.ToString().Trim();
+                string addressText = gvList.Rows[e.RowIndex].Cells["Address"].Value?.ToString().Trim();
+                int port;
+                ushort slaveId, address;
+
+                if (!Int32.TryParse(portText, out port))
+                    return;
+                if (!ushort.TryParse(slaveIdText, out slaveId))
+                    return;
+                if (!ushort.TryParse(addressText, out address))
+                    return;
+
+                ModbusInfo existModbusInfo = modbusInfoList.FirstOrDefault(x => x.ip == ip && x.port == port);
+                if (existModbusInfo != null)
+                {
+                    DataMapInfo existedDataMapInfo = existModbusInfo.DataMapInfoList.FirstOrDefault(x => x.SlaveId == slaveId && x.Address == address);
+                    if (existedDataMapInfo != null)
+                    {
+                        ViewTagInfo(existModbusInfo, existedDataMapInfo);
+                    }
+                }                
+            }
         }
+
+        public void ViewTagInfo(ModbusInfo modbusInfo, DataMapInfo dataMapInfo)
+        {
+            if (tagForm != null)
+            {
+                tagForm.Close();
+                tagForm.Dispose();
+            }
+
+            tagForm = new TagForm(this, modbusInfo, dataMapInfo);
+            tagForm.ShowDialog();
+            tagForm.Close();
+            tagForm.Dispose();
+            tagForm = null;
+        }
+
         private void gvList_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
 
+        }
+
+        private void gvList_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
+        {
+            string ip = gvList.Rows[e.Row.Index].Cells["Ip"].Value?.ToString().Trim();
+            string portText = gvList.Rows[e.Row.Index].Cells["Port"].Value?.ToString().Trim();
+            string slaveIdText = gvList.Rows[e.Row.Index].Cells["SlaveId"].Value?.ToString().Trim();
+            string addressText = gvList.Rows[e.Row.Index].Cells["Address"].Value?.ToString().Trim();
+            int port;
+            ushort slaveId, address;
+
+            if (!Int32.TryParse(portText, out port))
+                return;
+            if (!ushort.TryParse(slaveIdText, out slaveId))
+                return;
+            if (!ushort.TryParse(addressText, out address))
+                return;
+
+            ModbusInfo existModbusInfo = modbusInfoList.FirstOrDefault(x => x.ip == ip && x.port == port);
+            if (existModbusInfo != null)
+            {
+                DataMapInfo existedDataMapInfo = existModbusInfo.DataMapInfoList.FirstOrDefault(x => x.SlaveId == slaveId && x.Address == address);
+                if (existedDataMapInfo != null)
+                {
+                    RemoveModbusInfoOnCardView(existModbusInfo, existedDataMapInfo);
+                }
+            }
         }
 
         private void gvList_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
@@ -220,7 +335,7 @@ namespace ModbusOperationsApp
             bool isWritable;
             byte slaveId;
             ushort address, registerLength;
-            string ip, portText, slaveIdText, addressText, lengthText;
+            string ip, portText, slaveIdText, addressText, lengthText, tagName;
             string dataTypeText, byteOrderText, registerTypeText, isWritableText;
             string errorText;
             DataType dataType;
@@ -230,7 +345,7 @@ namespace ModbusOperationsApp
             ModbusInfo modbusInfo;
             List<ModbusInfo> modbusInfoList = new List<ModbusInfo>();
 
-            for (int i = 0; i < gvList.Rows.Count - 1; i++)
+            for (int i = 0; i < gvList.Rows.Count; i++)
             {
                 gvList.Rows[i].Cells["Status"].Value = ModbusOperationsApp.Properties.Resources.sandglass;
 
@@ -238,6 +353,7 @@ namespace ModbusOperationsApp
                 errorText = "";
                 ip = gvList.Rows[i].Cells["Ip"].Value?.ToString();
                 portText = gvList.Rows[i].Cells["Port"].Value?.ToString();
+                tagName = gvList.Rows[i].Cells["TagName"].Value?.ToString();
                 slaveIdText = gvList.Rows[i].Cells["SlaveId"].Value?.ToString();
                 addressText = gvList.Rows[i].Cells["Address"].Value?.ToString();
                 lengthText = gvList.Rows[i].Cells["RegisterLength"].Value?.ToString();
@@ -301,17 +417,17 @@ namespace ModbusOperationsApp
                 if (modbusInfo == null)
                 {
                     modbusInfo = new ModbusInfo(ip, port);
-                    modbusInfo.DataMapInfoList.Add(new DataMapInfo(i, slaveId, address, registerLength, dataType, byteOrder, registerType, isWritable));
+                    modbusInfo.DataMapInfoList.Add(new DataMapInfo(i, tagName, slaveId, address, registerLength, dataType, byteOrder, registerType, isWritable));
                     modbusInfoList.Add(modbusInfo);
                 }
                 else if (!modbusInfo.DataMapInfoList.Any(x => x.SlaveId == slaveId && x.Address == address))
                 {
-                    modbusInfo.DataMapInfoList.Add(new DataMapInfo(i, slaveId, address, registerLength, dataType, byteOrder, registerType, isWritable));
+                    modbusInfo.DataMapInfoList.Add(new DataMapInfo(i, tagName, slaveId, address, registerLength, dataType, byteOrder, registerType, isWritable));
                 }
                 #endregion
             }
 
-            var json = Newtonsoft.Json.JsonConvert.SerializeObject(modbusInfoList);
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(modbusInfoList, Newtonsoft.Json.Formatting.Indented);
 
             try
             {
@@ -338,32 +454,20 @@ namespace ModbusOperationsApp
                 {
                     using (StreamReader sr = new StreamReader(openFileDialogForm.FileName))
                     {
+                        int rowId;
                         string dataText = sr.ReadToEnd();
-                        List<ModbusInfo> modbusInfoList = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ModbusInfo>>(dataText);
+                        this.modbusInfoList = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ModbusInfo>>(dataText);
 
-                        int rowId = -1;
                         gvList.Rows.Clear();
                         foreach (ModbusInfo modbusInfo in modbusInfoList)
                         {
                             foreach (DataMapInfo dataMapInfo in modbusInfo.DataMapInfoList)
                             {
-                                rowId = gvList.Rows.Add();
+                                dataMapInfo.rowIndex = -1;
+                                CheckModbusInfoOnGridView(modbusInfo, dataMapInfo, out rowId);
+                                CheckModbusInfoOnCardView(modbusInfo, dataMapInfo);
 
-                                gvList.Rows[rowId].Cells["Ip"].Value = modbusInfo.ip;
-                                gvList.Rows[rowId].Cells["Port"].Value = modbusInfo.port;
-                                gvList.Rows[rowId].Cells["SlaveId"].Value = dataMapInfo.SlaveId;
-                                gvList.Rows[rowId].Cells["Address"].Value = dataMapInfo.Address;
-                                gvList.Rows[rowId].Cells["RegisterLength"].Value = dataMapInfo.Length;
-                                gvList.Rows[rowId].Cells["RegisterType"].Value = Enum.GetName(typeof(RegisterType), dataMapInfo.RegisterType);
-                                gvList.Rows[rowId].Cells["DataType"].Value = Enum.GetName(typeof(DataType), dataMapInfo.DataType);
-                                gvList.Rows[rowId].Cells["ByteOrder"].Value = Enum.GetName(typeof(ByteOrder), dataMapInfo.ByteOrder);
-                                ((DataGridViewCheckBoxCell)gvList.Rows[rowId].Cells["IsWritable"]).Value = dataMapInfo.IsWritable;
-                                gvList.Rows[rowId].Cells["Status"].Value = ModbusOperationsApp.Properties.Resources.sandglass;
-                                gvList.Rows[rowId].Cells["DataValue"].Value = "";
-                                gvList.Rows[rowId].Cells["Description"].Value = "";
-
-                                CheckControl_OnChangeDataType(rowId, dataMapInfo.DataType);
-                                CheckControl_OnChangeRegisterType(rowId, dataMapInfo.RegisterType);
+                                dataMapInfo.rowIndex = rowId;
                             }
                         }
                     }
@@ -395,6 +499,40 @@ namespace ModbusOperationsApp
             txtInterval.Enabled = true;
         }
 
+        private void btnAddTag_Click(object sender, EventArgs e)
+        {
+            if (tagForm != null)
+            {
+                tagForm.Close();
+                tagForm.Dispose();
+                tagForm = null;                
+            }
+            tagForm = new TagForm(this);
+            tagForm.ShowDialog();            
+        }
+
+        private void btnSelectGridView_Click(object sender, EventArgs e)
+        {
+            gvList.Dock = DockStyle.Fill;
+            gvList.Visible = true;
+
+            flpnlCardViewList.Dock = DockStyle.None;
+            flpnlCardViewList.Visible = false;
+                        
+            btnWrite.Visible = true;            
+        }
+
+        private void btnSelectCardView_Click(object sender, EventArgs e)
+        {
+            gvList.Dock = DockStyle.None;
+            gvList.Visible = false;
+
+            flpnlCardViewList.Dock = DockStyle.Fill;
+            flpnlCardViewList.Visible = true;
+                        
+            btnWrite.Visible = false;            
+        }
+
         private void SetTimerStatus()
         {
             int intervals = 1;
@@ -415,7 +553,7 @@ namespace ModbusOperationsApp
             bool isWritable;
             byte slaveId;
             ushort address, registerLength;
-            string ip, portText, slaveIdText, addressText, lengthText;
+            string ip, portText, slaveIdText, addressText, lengthText, tagName;
             string dataTypeText, byteOrderText, registerTypeText, isWritableText;
             string errorText;
             DataType dataType;
@@ -425,12 +563,7 @@ namespace ModbusOperationsApp
             ModbusInfo modbusInfo;
             List<ModbusInfo> modbusInfoList = new List<ModbusInfo>();
             
-            pboxLoading.Invoke((Action)(() =>
-            {
-                pboxLoading.Visible = true;
-            }));
-            
-            for (int i = 0; i < gvList.Rows.Count - 1; i++)
+            for (int i = 0; i < gvList.Rows.Count; i++)
             {
                 gvList.Rows[i].Cells["Status"].Value = ModbusOperationsApp.Properties.Resources.sandglass;
 
@@ -438,6 +571,7 @@ namespace ModbusOperationsApp
                 errorText = "";
                 ip = gvList.Rows[i].Cells["Ip"].Value?.ToString();
                 portText = gvList.Rows[i].Cells["Port"].Value?.ToString();
+                tagName = gvList.Rows[i].Cells["TagName"].Value?.ToString();
                 slaveIdText = gvList.Rows[i].Cells["SlaveId"].Value?.ToString();
                 addressText = gvList.Rows[i].Cells["Address"].Value?.ToString();
                 lengthText = gvList.Rows[i].Cells["RegisterLength"].Value?.ToString();
@@ -510,12 +644,12 @@ namespace ModbusOperationsApp
                 if (modbusInfo == null)
                 {
                     modbusInfo = new ModbusInfo(ip, port);
-                    modbusInfo.DataMapInfoList.Add(new DataMapInfo(i, slaveId, address, registerLength, dataType, byteOrder, registerType, isWritable));
+                    modbusInfo.DataMapInfoList.Add(new DataMapInfo(i, tagName, slaveId, address, registerLength, dataType, byteOrder, registerType, isWritable));
                     modbusInfoList.Add(modbusInfo);
                 }
                 else if (!modbusInfo.DataMapInfoList.Any(x => x.SlaveId == slaveId && x.Address == address))
                 {
-                    modbusInfo.DataMapInfoList.Add(new DataMapInfo(i, slaveId, address, registerLength, dataType, byteOrder, registerType, isWritable));
+                    modbusInfo.DataMapInfoList.Add(new DataMapInfo(i, tagName, slaveId, address, registerLength, dataType, byteOrder, registerType, isWritable));
                 }
                 #endregion
             }
@@ -526,11 +660,6 @@ namespace ModbusOperationsApp
                     ReadModbus(modbusInfoItem);
                 })
             );
-
-            pboxLoading.Invoke((Action)(() =>
-            {
-                pboxLoading.Visible = false;
-            }));
         }
 
         private async Task WriteModbusList()
@@ -539,7 +668,7 @@ namespace ModbusOperationsApp
             bool isWritable;
             byte slaveId;
             ushort address, registerLength;
-            string ip, portText, slaveIdText, addressText, lengthText;
+            string ip, portText, slaveIdText, addressText, lengthText, tagName;
             string dataTypeText, byteOrderText, registerTypeText, isWritableText;
             string errorText;
             DataType dataType;
@@ -549,15 +678,11 @@ namespace ModbusOperationsApp
             ModbusInfo modbusInfo;
             List<ModbusInfo> modbusInfoList = new List<ModbusInfo>();
 
-            pboxLoading.Invoke((Action)(() =>
-            {
-                pboxLoading.Visible = true;
-            }));
-
-            for (int i = 0; i < gvList.Rows.Count - 1; i++)
+            for (int i = 0; i < gvList.Rows.Count; i++)
             {
                 ip = gvList.Rows[i].Cells["Ip"].Value?.ToString();
                 portText = gvList.Rows[i].Cells["Port"].Value?.ToString();
+                tagName = gvList.Rows[i].Cells["TagName"].Value?.ToString();
                 slaveIdText = gvList.Rows[i].Cells["SlaveId"].Value?.ToString();
                 addressText = gvList.Rows[i].Cells["Address"].Value?.ToString();
                 lengthText = gvList.Rows[i].Cells["RegisterLength"].Value?.ToString();
@@ -637,12 +762,12 @@ namespace ModbusOperationsApp
                     if (modbusInfo == null)
                     {
                         modbusInfo = new ModbusInfo(ip, port);
-                        modbusInfo.DataMapInfoList.Add(new DataMapInfo(i, slaveId, address, registerLength, dataType, byteOrder, registerType, isWritable));
+                        modbusInfo.DataMapInfoList.Add(new DataMapInfo(i, tagName, slaveId, address, registerLength, dataType, byteOrder, registerType, isWritable));
                         modbusInfoList.Add(modbusInfo);
                     }
                     else if (!modbusInfo.DataMapInfoList.Any(x => x.SlaveId == slaveId && x.Address == address))
                     {
-                        modbusInfo.DataMapInfoList.Add(new DataMapInfo(i, slaveId, address, registerLength, dataType, byteOrder, registerType, isWritable));
+                        modbusInfo.DataMapInfoList.Add(new DataMapInfo(i, tagName, slaveId, address, registerLength, dataType, byteOrder, registerType, isWritable));
                     }
                     #endregion
 
@@ -654,11 +779,6 @@ namespace ModbusOperationsApp
                         WriteModbus(modbusInfoItem);
                     })
                 );
-
-            pboxLoading.Invoke((Action)(() =>
-            {
-                pboxLoading.Visible = false;
-            }));
         }
 
         private void ReadModbus(ModbusInfo modbusInfo)
@@ -791,12 +911,26 @@ namespace ModbusOperationsApp
                 }
                 finally
                 {
+                    DateTime updateTime = DateTime.Now;
                     gvList.Invoke((Action)(() =>
                     {
                         gvList.Rows[dataMapInfo.rowIndex].Cells["DataValue"].Value = resultValue;
                         gvList.Rows[dataMapInfo.rowIndex].Cells["Status"].Value = resultImage;
                         gvList.Rows[dataMapInfo.rowIndex].Cells["Description"].Value = result;
-                        gvList.Rows[dataMapInfo.rowIndex].Cells["UpdateDate"].Value = DateTime.Now.ToString("HH:mm:ss.fff yyyy.MM.dd");
+                        gvList.Rows[dataMapInfo.rowIndex].Cells["UpdateDate"].Value = updateTime.ToString("HH:mm:ss.fff yyyy.MM.dd");
+                    }));
+
+                    flpnlCardViewList.Invoke((Action)(() =>
+                    {
+                        foreach (CardViewItem item in flpnlCardViewList.Controls)
+                        {
+                            if (item.modbusInfo.ip == modbusInfo.ip && item.modbusInfo.port == modbusInfo.port &&
+                               item.dataMapInfo.SlaveId == dataMapInfo.SlaveId && item.dataMapInfo.Address == dataMapInfo.Address)
+                            {
+                                item.SetValue(resultValue, updateTime);
+                                break;
+                            }
+                        }
                     }));
                 }
             }
@@ -899,5 +1033,143 @@ namespace ModbusOperationsApp
                 }
             }
         }
+
+        private void CheckModbusInfoOnGridView(ModbusInfo modbusInfo, DataMapInfo dataMapInfo, out int rowId)
+        {
+            if (dataMapInfo.rowIndex == -1)
+            {
+                rowId = gvList.Rows.Add();                
+            }
+            else
+            {
+                rowId = dataMapInfo.rowIndex;
+            }
+
+            gvList.Rows[rowId].Cells["Ip"].Value = modbusInfo.ip;
+            gvList.Rows[rowId].Cells["Port"].Value = modbusInfo.port;
+            gvList.Rows[rowId].Cells["SlaveId"].Value = dataMapInfo.SlaveId;
+            gvList.Rows[rowId].Cells["Address"].Value = dataMapInfo.Address;
+            gvList.Rows[rowId].Cells["RegisterLength"].Value = dataMapInfo.Length;
+            gvList.Rows[rowId].Cells["RegisterType"].Value = Enum.GetName(typeof(RegisterType), dataMapInfo.RegisterType);
+            gvList.Rows[rowId].Cells["DataType"].Value = Enum.GetName(typeof(DataType), dataMapInfo.DataType);
+            gvList.Rows[rowId].Cells["ByteOrder"].Value = Enum.GetName(typeof(ByteOrder), dataMapInfo.ByteOrder);
+            ((DataGridViewCheckBoxCell)gvList.Rows[rowId].Cells["IsWritable"]).Value = dataMapInfo.IsWritable;
+            gvList.Rows[rowId].Cells["Status"].Value = ModbusOperationsApp.Properties.Resources.sandglass;
+            gvList.Rows[rowId].Cells["TagName"].Value = dataMapInfo.TagName;
+            gvList.Rows[rowId].Cells["DataValue"].Value = "";
+            gvList.Rows[rowId].Cells["Description"].Value = "";
+
+            CheckControl_OnChangeDataType(rowId, dataMapInfo.DataType);
+            CheckControl_OnChangeRegisterType(rowId, dataMapInfo.RegisterType);
+        }
+
+        private void CheckModbusInfoOnCardView(ModbusInfo modbusInfo, DataMapInfo dataMapInfo)
+        {
+            if (dataMapInfo.rowIndex == -1)
+            {
+                CardViewItem cardViewItem = new CardViewItem(modbusInfo, dataMapInfo);
+                cardViewItem.OnRemove += CardViewItem_OnRemove;
+                cardViewItem.OnEdit += CardViewItem_OnEdit;
+
+                flpnlCardViewList.Controls.Add(cardViewItem);
+            }
+            else
+            {
+                foreach (CardViewItem item in flpnlCardViewList.Controls)
+                {
+                    if (item.modbusInfo.ip == modbusInfo.ip && item.modbusInfo.port == modbusInfo.port &&
+                       item.dataMapInfo.SlaveId == dataMapInfo.SlaveId && item.dataMapInfo.Address == dataMapInfo.Address)
+                    {
+                        item.LoadTagInfo(modbusInfo, dataMapInfo);
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void CardViewItem_OnEdit(object sender, OnCardViewEventArgs e)
+        {
+            ViewTagInfo(e.modbusInfo, e.dataMapInfo);
+        }
+
+        private void CardViewItem_OnRemove(object sender, OnCardViewEventArgs e)
+        {
+            RemoveModbusInfoOnGridView(e.modbusInfo, e.dataMapInfo);
+            RemoveModbusInfoOnCardView(e.modbusInfo, e.dataMapInfo);
+        }
+
+        private void RemoveModbusInfoOnCardView(ModbusInfo modbusInfo, DataMapInfo dataMapInfo)
+        {
+            foreach (CardViewItem item in flpnlCardViewList.Controls)
+            {
+                if(item.modbusInfo.ip == modbusInfo.ip && item.modbusInfo.port == modbusInfo.port &&
+                   item.dataMapInfo.SlaveId == dataMapInfo.SlaveId && item.dataMapInfo.Address == dataMapInfo.Address)
+                {
+                    flpnlCardViewList.Controls.Remove(item);
+                    break;
+                }
+            }
+
+            RefreshGridViewIndex();
+        }
+
+        private void RemoveModbusInfoOnGridView(ModbusInfo modbusInfo, DataMapInfo dataMapInfo)
+        {
+            if (dataMapInfo.rowIndex != -1)
+            {
+                gvList.Rows.RemoveAt(dataMapInfo.rowIndex);
+            }
+            else
+            {
+                foreach (DataGridViewRow row in gvList.Rows)
+                {
+                    if (row.Cells["Ip"].Value == modbusInfo.ip && row.Cells["Port"].Value.ToString() == modbusInfo.port.ToString() &&
+                        row.Cells["SlaveId"].Value.ToString() == dataMapInfo.SlaveId.ToString() && row.Cells["Address"].Value.ToString() == dataMapInfo.Address.ToString())
+                    {
+                        gvList.Rows.RemoveAt(row.Index);
+                    }
+                }
+            }
+
+            RefreshGridViewIndex();
+        }
+
+        private void RefreshGridViewIndex()
+        {
+            int rowIndex = 0;
+            int port;
+            byte slaveId;
+            ushort address;
+            string ip;
+            ModbusInfo existedModbusInfo;
+            DataMapInfo existedDataMapInfo;
+            gvList.Invoke((Action)(() =>
+            {
+                foreach (DataGridViewRow row in gvList.Rows)
+                {
+                    ip = row.Cells["Ip"].Value?.ToString();
+                    if (string.IsNullOrEmpty(ip))
+                        return;
+
+                    port = (int)row.Cells["Port"].Value;
+                    slaveId = (byte)row.Cells["SlaveId"].Value;
+                    address = (ushort)row.Cells["Address"].Value;
+
+                    existedModbusInfo = modbusInfoList.FirstOrDefault(mi => mi.ip == ip && mi.port == port);
+                    if (existedModbusInfo != null)
+                    {
+                        existedDataMapInfo = existedModbusInfo.DataMapInfoList.FirstOrDefault(dmi => dmi.SlaveId == slaveId && dmi.Address == address);
+                        if (existedDataMapInfo != null)
+                        {
+                            existedDataMapInfo.rowIndex = rowIndex;
+                        }
+                    }
+
+                    rowIndex++;
+                }
+            }));
+        }
+
+
     }
 }
