@@ -21,6 +21,9 @@ namespace ModbusOperationsApp
         public delegate void OnEditEventHandler(object sender, OnCardViewEventArgs e);
         public event OnEditEventHandler OnEdit;
 
+        public delegate void OnWriteRequestEventHandler(object sender, OnCardViewEventArgs e);
+        public event OnWriteRequestEventHandler OnWriteRequest;
+
         public CardViewItem(ModbusInfo modbusInfo, DataMapInfo dataMapInfo)
         {
             InitializeComponent();
@@ -55,7 +58,11 @@ namespace ModbusOperationsApp
 
         private void btnWrite_Click(object sender, EventArgs e)
         {
-
+            string valueText = txtValue.Text.Trim().Replace(",", System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)
+                                                   .Replace(",", System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator);
+                        
+            if (OnWriteRequest != null)
+                OnWriteRequest(this, new OnCardViewEventArgs(this.modbusInfo, this.dataMapInfo, valueText));
         }
 
         private void btnRemoveTag_Click(object sender, EventArgs e)
@@ -82,10 +89,13 @@ namespace ModbusOperationsApp
         public ModbusInfo modbusInfo { get; private set; }
         public DataMapInfo dataMapInfo { get; private set; }
 
-        public OnCardViewEventArgs(ModbusInfo modbusInfo, DataMapInfo dataMapInfo)
+        public string Value { get; private set; }
+
+        public OnCardViewEventArgs(ModbusInfo modbusInfo, DataMapInfo dataMapInfo, string value = "")
         {
             this.modbusInfo = modbusInfo;
             this.dataMapInfo = dataMapInfo;
+            this.Value = value;
         }
     }
 }

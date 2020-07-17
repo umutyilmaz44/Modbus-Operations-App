@@ -40,6 +40,19 @@
             this.chboxInterval = new System.Windows.Forms.CheckBox();
             this.btnRead = new System.Windows.Forms.Button();
             this.gvList = new System.Windows.Forms.DataGridView();
+            this.tmrIntervalControl = new System.Windows.Forms.Timer(this.components);
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.modeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnSelectGridView = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnSelectCardView = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveFileDialogForm = new System.Windows.Forms.SaveFileDialog();
+            this.openFileDialogForm = new System.Windows.Forms.OpenFileDialog();
+            this.flpnlCardViewList = new System.Windows.Forms.FlowLayoutPanel();
             this.Ip = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Port = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.SlaveId = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -54,19 +67,6 @@
             this.DataValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Description = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.UpdateDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.tmrIntervalControl = new System.Windows.Forms.Timer(this.components);
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.modeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.btnSelectGridView = new System.Windows.Forms.ToolStripMenuItem();
-            this.btnSelectCardView = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveFileDialogForm = new System.Windows.Forms.SaveFileDialog();
-            this.openFileDialogForm = new System.Windows.Forms.OpenFileDialog();
-            this.flpnlCardViewList = new System.Windows.Forms.FlowLayoutPanel();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gvList)).BeginInit();
             this.menuStrip1.SuspendLayout();
@@ -177,116 +177,12 @@
             this.gvList.Location = new System.Drawing.Point(0, 24);
             this.gvList.MultiSelect = false;
             this.gvList.Name = "gvList";
-            this.gvList.ReadOnly = true;
             this.gvList.Size = new System.Drawing.Size(984, 151);
             this.gvList.TabIndex = 3;
             this.gvList.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gvList_CellContentDoubleClick);
             this.gvList.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.gvList_DataError);
             this.gvList.EditingControlShowing += new System.Windows.Forms.DataGridViewEditingControlShowingEventHandler(this.gvList_EditingControlShowing);
             this.gvList.UserDeletingRow += new System.Windows.Forms.DataGridViewRowCancelEventHandler(this.gvList_UserDeletingRow);
-            // 
-            // Ip
-            // 
-            this.Ip.HeaderText = "Ip";
-            this.Ip.Name = "Ip";
-            this.Ip.ReadOnly = true;
-            this.Ip.Width = 85;
-            // 
-            // Port
-            // 
-            this.Port.HeaderText = "Port";
-            this.Port.Name = "Port";
-            this.Port.ReadOnly = true;
-            this.Port.Width = 40;
-            // 
-            // SlaveId
-            // 
-            this.SlaveId.HeaderText = "SlaveId";
-            this.SlaveId.Name = "SlaveId";
-            this.SlaveId.ReadOnly = true;
-            this.SlaveId.Width = 45;
-            // 
-            // Address
-            // 
-            this.Address.HeaderText = "Address";
-            this.Address.Name = "Address";
-            this.Address.ReadOnly = true;
-            this.Address.Width = 50;
-            // 
-            // RegisterType
-            // 
-            this.RegisterType.HeaderText = "RegisterType";
-            this.RegisterType.Name = "RegisterType";
-            this.RegisterType.ReadOnly = true;
-            this.RegisterType.Width = 85;
-            // 
-            // DataType
-            // 
-            this.DataType.HeaderText = "DataType";
-            this.DataType.Name = "DataType";
-            this.DataType.ReadOnly = true;
-            this.DataType.Width = 70;
-            // 
-            // ByteOrder
-            // 
-            this.ByteOrder.HeaderText = "ByteOrder";
-            this.ByteOrder.Name = "ByteOrder";
-            this.ByteOrder.ReadOnly = true;
-            this.ByteOrder.Width = 70;
-            // 
-            // RegisterLength
-            // 
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.RegisterLength.DefaultCellStyle = dataGridViewCellStyle1;
-            this.RegisterLength.HeaderText = "Length";
-            this.RegisterLength.Name = "RegisterLength";
-            this.RegisterLength.ReadOnly = true;
-            this.RegisterLength.Width = 42;
-            // 
-            // IsWritable
-            // 
-            this.IsWritable.HeaderText = "Writable";
-            this.IsWritable.Name = "IsWritable";
-            this.IsWritable.ReadOnly = true;
-            this.IsWritable.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.IsWritable.Width = 50;
-            // 
-            // Status
-            // 
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.Status.DefaultCellStyle = dataGridViewCellStyle2;
-            this.Status.HeaderText = "Status";
-            this.Status.ImageLayout = System.Windows.Forms.DataGridViewImageCellLayout.Zoom;
-            this.Status.Name = "Status";
-            this.Status.ReadOnly = true;
-            this.Status.Width = 50;
-            // 
-            // TagName
-            // 
-            this.TagName.HeaderText = "Tag";
-            this.TagName.Name = "TagName";
-            this.TagName.ReadOnly = true;
-            // 
-            // DataValue
-            // 
-            this.DataValue.HeaderText = "Value";
-            this.DataValue.Name = "DataValue";
-            this.DataValue.ReadOnly = true;
-            this.DataValue.Width = 75;
-            // 
-            // Description
-            // 
-            this.Description.HeaderText = "Description";
-            this.Description.Name = "Description";
-            this.Description.ReadOnly = true;
-            this.Description.Width = 150;
-            // 
-            // UpdateDate
-            // 
-            this.UpdateDate.HeaderText = "Date";
-            this.UpdateDate.Name = "UpdateDate";
-            this.UpdateDate.ReadOnly = true;
-            this.UpdateDate.Width = 125;
             // 
             // tmrIntervalControl
             // 
@@ -391,6 +287,105 @@
             this.flpnlCardViewList.Name = "flpnlCardViewList";
             this.flpnlCardViewList.Size = new System.Drawing.Size(984, 201);
             this.flpnlCardViewList.TabIndex = 7;
+            // 
+            // Ip
+            // 
+            this.Ip.HeaderText = "Ip";
+            this.Ip.Name = "Ip";
+            this.Ip.ReadOnly = true;
+            this.Ip.Width = 85;
+            // 
+            // Port
+            // 
+            this.Port.HeaderText = "Port";
+            this.Port.Name = "Port";
+            this.Port.ReadOnly = true;
+            this.Port.Width = 40;
+            // 
+            // SlaveId
+            // 
+            this.SlaveId.HeaderText = "SlaveId";
+            this.SlaveId.Name = "SlaveId";
+            this.SlaveId.ReadOnly = true;
+            this.SlaveId.Width = 45;
+            // 
+            // Address
+            // 
+            this.Address.HeaderText = "Address";
+            this.Address.Name = "Address";
+            this.Address.ReadOnly = true;
+            this.Address.Width = 50;
+            // 
+            // RegisterType
+            // 
+            this.RegisterType.HeaderText = "RegisterType";
+            this.RegisterType.Name = "RegisterType";
+            this.RegisterType.ReadOnly = true;
+            this.RegisterType.Width = 85;
+            // 
+            // DataType
+            // 
+            this.DataType.HeaderText = "DataType";
+            this.DataType.Name = "DataType";
+            this.DataType.ReadOnly = true;
+            this.DataType.Width = 70;
+            // 
+            // ByteOrder
+            // 
+            this.ByteOrder.HeaderText = "ByteOrder";
+            this.ByteOrder.Name = "ByteOrder";
+            this.ByteOrder.ReadOnly = true;
+            this.ByteOrder.Width = 70;
+            // 
+            // RegisterLength
+            // 
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.RegisterLength.DefaultCellStyle = dataGridViewCellStyle1;
+            this.RegisterLength.HeaderText = "Length";
+            this.RegisterLength.Name = "RegisterLength";
+            this.RegisterLength.Width = 42;
+            // 
+            // IsWritable
+            // 
+            this.IsWritable.HeaderText = "Writable";
+            this.IsWritable.Name = "IsWritable";
+            this.IsWritable.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.IsWritable.Width = 50;
+            // 
+            // Status
+            // 
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.Status.DefaultCellStyle = dataGridViewCellStyle2;
+            this.Status.HeaderText = "Status";
+            this.Status.ImageLayout = System.Windows.Forms.DataGridViewImageCellLayout.Zoom;
+            this.Status.Name = "Status";
+            this.Status.Width = 50;
+            // 
+            // TagName
+            // 
+            this.TagName.HeaderText = "Tag";
+            this.TagName.Name = "TagName";
+            this.TagName.ReadOnly = true;
+            // 
+            // DataValue
+            // 
+            this.DataValue.HeaderText = "Value";
+            this.DataValue.Name = "DataValue";
+            this.DataValue.Width = 75;
+            // 
+            // Description
+            // 
+            this.Description.HeaderText = "Description";
+            this.Description.Name = "Description";
+            this.Description.ReadOnly = true;
+            this.Description.Width = 150;
+            // 
+            // UpdateDate
+            // 
+            this.UpdateDate.HeaderText = "Date";
+            this.UpdateDate.Name = "UpdateDate";
+            this.UpdateDate.ReadOnly = true;
+            this.UpdateDate.Width = 125;
             // 
             // MainForm
             // 

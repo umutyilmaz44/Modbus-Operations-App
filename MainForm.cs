@@ -936,7 +936,7 @@ namespace ModbusOperationsApp
             }
         }
 
-        private void WriteModbus(ModbusInfo modbusInfo)
+        public void WriteModbus(ModbusInfo modbusInfo)
         {
             bool isWritable;
             string result = "", valueText="";            
@@ -1070,6 +1070,7 @@ namespace ModbusOperationsApp
                 CardViewItem cardViewItem = new CardViewItem(modbusInfo, dataMapInfo);
                 cardViewItem.OnRemove += CardViewItem_OnRemove;
                 cardViewItem.OnEdit += CardViewItem_OnEdit;
+                cardViewItem.OnWriteRequest += CardViewItem_OnWriteRequest;
 
                 flpnlCardViewList.Controls.Add(cardViewItem);
             }
@@ -1085,6 +1086,23 @@ namespace ModbusOperationsApp
                     }
                 }
             }
+        }
+
+        private async void CardViewItem_OnWriteRequest(object sender, OnCardViewEventArgs e)
+        {
+            int rowId = e.dataMapInfo.rowIndex;
+            gvList.Invoke((Action)(() =>
+            {
+                gvList.Rows[rowId].Cells["DataValue"].Value = e.Value;
+            }));
+            e.modbusInfo.DataMapInfoList.Add(e.dataMapInfo);
+            List<ModbusInfo> modbusInfoList = new List<ModbusInfo>() { e.modbusInfo };
+            await Task.Factory.StartNew(() =>
+                    Parallel.ForEach(modbusInfoList, modbusInfoItem =>
+                    {
+                        WriteModbus(modbusInfoItem);
+                    })
+                );
         }
 
         private void CardViewItem_OnEdit(object sender, OnCardViewEventArgs e)
